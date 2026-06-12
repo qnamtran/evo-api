@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
                     Temperature: ${t.temperature_c} °C<br>
                     Max Capacity: ${t.max_capacity_l} L<br>
                     Capacity: ${t.capacity_percent} %<br>
-                    Timestampt: ${t.timestamp}
+                    Timestamp: ${t.timestamp}
                 </div>
             `;
         });
