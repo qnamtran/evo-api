@@ -1,7 +1,10 @@
 const express = require("express");
+const cors = require("cors");
+
 const app = express();
 
 app.use(express.json());
+app.use(cors()); // ✅ Allow cross-origin (very important for embed)
 
 let latestData = {};
 
@@ -16,7 +19,7 @@ app.post("/api/evo", (req, res) => {
         updated: new Date()
     };
 
-    console.log("Data received from:", site);
+    console.log("✅ Data received from:", site);
 
     res.json({ status: "ok" });
 });
@@ -59,14 +62,6 @@ app.get("/", (req, res) => {
                 margin-left: 10px;
             }
         </style>
-
-        <!-- HARD REFRESH EVERY 4 MINUTES -->
-        <script>
-            setTimeout(function() {
-                console.log("Refreshing page...");
-                location.reload();
-            }, 240000); // 4 minutes
-        </script>
     </head>
 
     <body>
@@ -109,15 +104,24 @@ app.get("/", (req, res) => {
                     document.getElementById("data").innerHTML = html;
 
                 } catch (err) {
-                    console.error("Error loading data", err);
+                    console.error("❌ Error loading data:", err);
+
+                    document.getElementById("data").innerHTML =
+                        "<p style='color:red;text-align:center;'>Failed to load data</p>";
                 }
             }
 
-            // Initial load
+            // ✅ Initial load
             load();
 
-            // SOFT REFRESH EVERY 30 SECONDS
+            // ✅ SOFT REFRESH EVERY 30 SECONDS (recommended)
             setInterval(load, 30000);
+
+            // ✅ SAFE HARD REFRESH EVERY 4 MINUTES (iframe-safe)
+            setInterval(function() {
+                console.log("🔄 Hard refresh...");
+                window.location.reload();
+            }, 240000);
         </script>
     </body>
     </html>
