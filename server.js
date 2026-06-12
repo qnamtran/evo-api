@@ -45,10 +45,12 @@ app.get("/", (req, res) => {
             .card {
                 border: 1px solid #ccc;
                 border-radius: 8px;
-                margin: 10px;
-                padding: 10px;
+                margin: 12px;
+                padding: 12px;
                 background: white;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                font-size: 16px;
+                line-height: 24px;
             }
             h2 {
                 text-align: center;
