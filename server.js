@@ -23,22 +23,27 @@ app.get("/api/data", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-    res.send(`
-        <h2>EVO Fuel Dashboard</h2>
-        <div id="data"></div>
+    let html = "<h2>EVO Fuel Dashboard</h2>";
 
-        <script>
-        async function load() {
-            let res = await fetch('/api/data');
-            let data = await res.json();
-            document.getElementById("data").innerText =
-                JSON.stringify(data, null, 2);
-        }
+    for (let site in latestData) {
+        let tanks = latestData[site].data.tanks;
 
-        setInterval(load, 5000);
-        load();
-        </script>
-    `);
+        html += `<h3>${site}</h3>`;
+
+        tanks.forEach(t => {
+            html += `
+                <div style="border:1px solid #ccc; margin:10px; padding:10px;">
+                    <b>${t.tank}</b> (${t.status})<br>
+                    Product: ${t.product}<br>
+                    Level: ${t.level_cm} cm<br>
+                    Volume: ${t.net_volume_l} L<br>
+                    Capacity: ${t.capacity_percent} %
+                </div>
+            `;
+        });
+    }
+
+    res.send(html);
 });
 
 app.listen(3000, () => console.log("Server running"));
