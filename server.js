@@ -39,7 +39,7 @@ app.get("/", (req, res) => {
 
         <style>
             body {
-                font-family: Arial;
+                font-family: sans-serif;
                 background-color: #f5f5f5;
             }
             .card {
@@ -74,7 +74,7 @@ app.get("/", (req, res) => {
         <script>
             async function load() {
                 try {
-                    let res = await fetch('/api/data');
+                    let res = await fetch('https://evo-api-3f4c.onrender.com/api/data');
                     let data = await res.json();
 
                     let html = "";
