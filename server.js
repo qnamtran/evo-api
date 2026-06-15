@@ -139,7 +139,9 @@ app.get("/", (req, res) => {
                                     Volume: \${t.net_volume_l} L<br>
                                     Level: \${t.level_cm} cm<br>
                                     Temperature: \${t.temperature_c} °C<br>
-                                    Capacity: \${t.capacity_percent} %
+                                    Max Capacity: \${t.max_capacity_l} L<br>
+                                    Capacity: \${t.capacity_percent} %<br>
+                                    Timestamp: \${t.timestamp}
                                 </div>
                             \`;
                         });
