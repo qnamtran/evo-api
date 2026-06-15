@@ -1,6 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const fs = require("fs");
+if (!fs.existsSync("uploads")) {
+    fs.mkdirSync("uploads");
+}
 
 const app = express();
 
@@ -56,7 +60,7 @@ app.post("/api/upload", (req, res) => {
             return res.status(400).send("No file");
         }
 
-        console.log("✅ Image uploaded: evo.png");
+        console.log("Image uploaded: evo.png");
 
         res.json({ status: "ok" });
     });
