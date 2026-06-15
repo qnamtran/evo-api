@@ -95,7 +95,7 @@ app.get("/", (req, res) => {
             ${
                 latestImage
                     ? `<img src="/uploads/${latestImage}" />`
-                    : "<p>No image available</p>"
+                    : "<p>No data available</p>"
             }
         </div>
 
