@@ -122,7 +122,7 @@ app.get("/", (req, res) => {
 
         <!-- IMAGE FALLBACK (IE will use this) -->
         <div id="imageContainer">
-            <img src="/uploads/evo.png?t=${Date.now()}" />
+           <img src="https://evo-api-3f4c.onrender.com/uploads/evo.png">
         </div>
 
         <!-- MODERN DASHBOARD -->
