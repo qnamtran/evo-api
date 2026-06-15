@@ -1,15 +1,20 @@
 const express = require("express");
 const cors = require("cors");
+const multer = require("multer");
 
 const app = express();
 
 app.use(express.json());
-app.use(cors()); // ✅ Allow cross-origin (very important for embed)
+app.use(cors());
+
+const upload = multer({ dest: "uploads/" });
+app.use("/uploads", express.static("uploads"));
 
 let latestData = {};
+let latestImage = "";
 
 // ==========================
-// RECEIVE DATA
+// RECEIVE DATA (JSON)
 // ==========================
 app.post("/api/evo", (req, res) => {
     const site = req.body.site || "unknown";
@@ -19,13 +24,22 @@ app.post("/api/evo", (req, res) => {
         updated: new Date()
     };
 
-    console.log("✅ Data received from:", site);
-
+    console.log("Data received:", site);
     res.json({ status: "ok" });
 });
 
 // ==========================
-// API DATA ENDPOINT
+// RECEIVE IMAGE
+// ==========================
+app.post("/api/upload", upload.single("image"), (req, res) => {
+    latestImage = req.file.filename;
+
+    console.log("Image uploaded");
+    res.json({ status: "ok" });
+});
+
+// ==========================
+// API DATA
 // ==========================
 app.get("/api/data", (req, res) => {
     res.json(latestData);
@@ -38,13 +52,22 @@ app.get("/", (req, res) => {
     res.send(`
     <html>
     <head>
-        <title>EVO Fuel Dashboard</title>
+        <title>EVO Dashboard</title>
+
+        <!-- IE-safe refresh -->
+        <meta http-equiv="refresh" content="30">
 
         <style>
             body {
                 font-family: sans-serif;
                 background-color: #f5f5f5;
+                text-align: center;
             }
+
+            .container {
+                display: none; /* modern UI hidden by default */
+            }
+
             .card {
                 border: 1px solid #ccc;
                 border-radius: 8px;
@@ -52,33 +75,42 @@ app.get("/", (req, res) => {
                 padding: 12px;
                 background: white;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                font-size: 16px;
-                line-height: 24px;
+                text-align: left;
             }
-            h2 {
-                text-align: center;
-            }
-            h3 {
-                margin-left: 10px;
+
+            img {
+                max-width: 95%;
+                border: 1px solid #ccc;
+                margin-top: 20px;
             }
         </style>
     </head>
 
     <body>
+
         <h2>EVO Fuel Dashboard</h2>
-        <div id="data">Loading...</div>
+
+        <!-- IMAGE FALLBACK (ALWAYS SHOWS IN IE) -->
+        <div id="imageContainer">
+            ${
+                latestImage
+                    ? `<img src="/uploads/${latestImage}" />`
+                    : "<p>No image available</p>"
+            }
+        </div>
+
+        <!-- MODERN DASHBOARD -->
+        <div id="data" class="container"></div>
 
         <script>
-            async function load() {
-                try {
+            // Modern browsers will execute this
+            try {
+
+                async function load() {
                     let res = await fetch('https://evo-api-3f4c.onrender.com/api/data');
                     let data = await res.json();
 
                     let html = "";
-
-                    if (Object.keys(data).length === 0) {
-                        html = "<p style='text-align:center;'>No data yet...</p>";
-                    }
 
                     for (let site in data) {
                         let tanks = data[site].data.tanks;
@@ -93,9 +125,7 @@ app.get("/", (req, res) => {
                                     Volume: \${t.net_volume_l} L<br>
                                     Level: \${t.level_cm} cm<br>
                                     Temperature: \${t.temperature_c} °C<br>
-                                    Max Capacity: \${t.max_capacity_l} L<br>
-                                    Capacity: \${t.capacity_percent} %<br>
-                                    Timestamp: \${t.timestamp}
+                                    Capacity: \${t.capacity_percent} %
                                 </div>
                             \`;
                         });
@@ -103,30 +133,25 @@ app.get("/", (req, res) => {
 
                     document.getElementById("data").innerHTML = html;
 
-                } catch (err) {
-                    console.error("❌ Error loading data:", err);
-
-                    document.getElementById("data").innerHTML =
-                        "<p style='color:red;text-align:center;'>Failed to load data</p>";
+                    // Switch from image → live dashboard
+                    document.getElementById("imageContainer").style.display = "none";
+                    document.getElementById("data").style.display = "block";
                 }
+
+                load();
+
+                // Live refresh
+                setInterval(load, 30000);
+
+            } catch (e) {
+                console.log("IE mode: using image fallback");
             }
-
-            // ✅ Initial load
-            load();
-
-            // ✅ SOFT REFRESH EVERY 30 SECONDS (recommended)
-            setInterval(load, 30000);
-
-            // ✅ SAFE HARD REFRESH EVERY 4 MINUTES (iframe-safe)
-            setInterval(function() {
-                console.log("🔄 Hard refresh...");
-                window.location.reload();
-            }, 240000);
         </script>
+
     </body>
     </html>
     `);
 });
 
 // ==========================
-app.listen(3000, () => console.log("🚀 Server running"));
+app.listen(3000, () => console.log("Server running"));
