@@ -28,7 +28,7 @@ const upload = multer({ storage: storage });
 app.use("/uploads", express.static("uploads"));
 
 let latestData = {};
-
+let lastImageUpdate = "";
 // ==========================
 // RECEIVE DATA (JSON)
 // ==========================
@@ -59,8 +59,13 @@ app.post("/api/upload", (req, res) => {
             console.log("No file received");
             return res.status(400).send("No file");
         }
+        
+        lastImageUpdate = new Date().toLocaleString('en-CA', {
+            hour12: false
+        });
 
-        console.log("Image uploaded: evo.png");
+        console.log("Image uploaded: evo.png at", lastImageUpdate);
+
 
         res.json({ status: "ok" });
     });
@@ -121,8 +126,10 @@ app.get("/", (req, res) => {
         <h2>EVO Fuel Dashboard</h2>
 
         <!-- IMAGE FALLBACK (IE will use this) -->
+        
         <div id="imageContainer">
-           <img src="https://evo-api-3f4c.onrender.com/uploads/evo.png">
+            <img src="https://evo-api-3f4c.onrender.com/uploads/evo.png" />
+            <p>Last updated: ${lastImageUpdate || "Waiting for data..."}</p>
         </div>
 
         <!-- MODERN DASHBOARD -->
@@ -138,9 +145,13 @@ app.get("/", (req, res) => {
                     let html = "";
 
                     for (let site in data) {
+                        let updated = data[site].updated;
+                        
+                        html += "<h3>" + site + "</h3>";
+                        html += "<p><b>Last updated: " + new Date(updated).toLocaleString() + "</b></p>";
+                        
                         let tanks = data[site].data.tanks;
 
-                        html += "<h3>" + site + "</h3>";
 
                         tanks.forEach(t => {
                             html += \`
