@@ -7,11 +7,23 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const upload = multer({ dest: "uploads/" });
+// ==========================
+// STORAGE (FORCE evo.png)
+// ==========================
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "uploads/");
+    },
+    filename: function (req, file, cb) {
+        cb(null, "evo.png"); // always overwrite
+    }
+});
+
+const upload = multer({ storage: storage });
+
 app.use("/uploads", express.static("uploads"));
 
 let latestData = {};
-let latestImage = "";
 
 // ==========================
 // RECEIVE DATA (JSON)
@@ -44,9 +56,7 @@ app.post("/api/upload", (req, res) => {
             return res.status(400).send("No file");
         }
 
-        latestImage = req.file.filename;
-
-        console.log("Image uploaded:", req.file.filename);
+        console.log("✅ Image uploaded: evo.png");
 
         res.json({ status: "ok" });
     });
@@ -79,7 +89,7 @@ app.get("/", (req, res) => {
             }
 
             .container {
-                display: none; /* modern UI hidden by default */
+                display: none;
             }
 
             .card {
@@ -104,20 +114,15 @@ app.get("/", (req, res) => {
 
         <h2>EVO Fuel Dashboard</h2>
 
-        <!-- IMAGE FALLBACK (ALWAYS SHOWS IN IE) -->
+        <!-- IMAGE FALLBACK (IE will use this) -->
         <div id="imageContainer">
-            ${
-                latestImage
-                    ? `<img src="/uploads/${latestImage}" />`
-                    : "<p>No data available</p>"
-            }
+            <img src="/uploads/evo.png?t=${Date.now()}" />
         </div>
 
         <!-- MODERN DASHBOARD -->
         <div id="data" class="container"></div>
 
         <script>
-            // Modern browsers will execute this
             try {
 
                 async function load() {
@@ -149,18 +154,18 @@ app.get("/", (req, res) => {
 
                     document.getElementById("data").innerHTML = html;
 
-                    // Switch from image → live dashboard
+                    // Switch to modern UI
                     document.getElementById("imageContainer").style.display = "none";
                     document.getElementById("data").style.display = "block";
                 }
 
                 load();
 
-                // Live refresh
+                // Live refresh (modern browsers)
                 setInterval(load, 30000);
 
             } catch (e) {
-                console.log("IE mode: using image fallback");
+                console.log("IE mode → using image fallback");
             }
         </script>
 
