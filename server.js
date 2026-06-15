@@ -31,11 +31,25 @@ app.post("/api/evo", (req, res) => {
 // ==========================
 // RECEIVE IMAGE
 // ==========================
-app.post("/api/upload", upload.single("image"), (req, res) => {
-    latestImage = req.file.filename;
+app.post("/api/upload", (req, res) => {
+    upload.single("image")(req, res, function (err) {
 
-    console.log("Image uploaded");
-    res.json({ status: "ok" });
+        if (err) {
+            console.log("Upload error:", err);
+            return res.status(500).send("Upload failed");
+        }
+
+        if (!req.file) {
+            console.log("No file received");
+            return res.status(400).send("No file");
+        }
+
+        latestImage = req.file.filename;
+
+        console.log("Image uploaded:", req.file.filename);
+
+        res.json({ status: "ok" });
+    });
 });
 
 // ==========================
